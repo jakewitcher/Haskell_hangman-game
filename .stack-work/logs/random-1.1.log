@@ -1,0 +1,14 @@
+Warning: random.cabal:15:2: Tabs used as indentation at 15:2, 16:2, 17:2
+Configuring random-1.1...
+Preprocessing library for random-1.1..
+Building library for random-1.1..
+[1 of 1] Compiling System.Random    ( System\Random.hs, .stack-work\dist\e626a42b\build\System\Random.o )
+
+[;1mSystem\Random.hs:43:1: [;1m[35mwarning:[0m[0m[;1m [[;1m[35m-Wtabs[0m[0m[;1m][0m[0m[;1m
+    Tab character found here, and in 74 further locations.
+    Please use spaces instead.[0m[0m
+[;1m[34m   |[0m[0m
+[;1m[34m43 |[0m[0m [;1m[35m        [0m[0m(
+[;1m[34m   |[0m[0m[;1m[35m ^^^^^^^^[0m[0m
+[0m[0m[0mInstalling library in C:\sr\snapshots\c710b79d\lib\x86_64-windows-ghc-8.6.4\random-1.1-3ypV4EIycgb35PKjTYYr5q
+Registering library for random-1.1..
