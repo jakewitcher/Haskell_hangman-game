@@ -1,8 +1,8 @@
 module Main where
 
-import Control.Monad  (forever)
+import Control.Monad  (forever, when)
 import Data.Char      (toLower)
-import Data.Maybe     (isJust)
+import Data.Maybe     (isJust, fromMaybe)
 import Data.List      (intersperse)
 import System.Exit    (exitSuccess)
 import System.Random  (randomRIO)
@@ -35,24 +35,24 @@ gameWords = do
 
 randomWord :: WordList -> IO String
 randomWord (WordList wl) = do 
-  randomIndex <- randomRIO (0, (length wl) - 1)
+  randomIndex <- randomRIO (0, length wl - 1)
   return $ wl !! randomIndex
 
 randomWord' :: IO String 
 randomWord' = gameWords >>= randomWord
 
-data Puzzle = Puzzle String [Maybe Char] [Char]
+data Puzzle = Puzzle String [Maybe Char] String
 
 instance Show Puzzle where
   show (Puzzle _ discovered guessed) =
-    (intersperse ' ' $
-     fmap renderPuzzleChar discovered)
-     ++ " Guessed so far: " ++ intersperse ',' guessed
+    intersperse ' '
+    (fmap renderPuzzleChar discovered)
+    ++ " Guessed so far: " ++ intersperse ',' guessed
 
 freshPuzzle :: String -> Puzzle 
 freshPuzzle word =
   Puzzle word (go word) []
-  where go = map (\x -> const Nothing x)
+  where go = map (const Nothing)
           
 charInWord :: Puzzle -> Char -> Bool
 charInWord (Puzzle word _ _) char =
@@ -63,10 +63,7 @@ alreadyGuessed (Puzzle _ _ guesses) char =
   char `elem` guesses
 
 renderPuzzleChar :: Maybe Char -> Char 
-renderPuzzleChar mc =
-  case mc of
-    Just a  -> a 
-    Nothing -> '_'
+renderPuzzleChar = fromMaybe '_'
 
 fillInCharacter :: Puzzle -> Char -> Puzzle 
 fillInCharacter (Puzzle word filledInSoFar alreadyGuessed) char =
@@ -100,16 +97,14 @@ handleGuess puzzle guess = do
 
 gameOver :: Puzzle -> IO ()
 gameOver p@(Puzzle wordToGuess _ guessed) =
-  if (wrongGuesses p) > 7 
-  then do
-    putStrLn "You lose!"
-    putStrLn $ "The word was: " ++ wordToGuess
-    playAgain
-  else return ()
+    when (wrongGuesses p > 7) 
+        (do putStrLn "You lose!"
+            putStrLn $ "The word was: " ++ wordToGuess
+            playAgain)
 
 wrongGuesses :: Puzzle -> Int 
 wrongGuesses (Puzzle _ filledIn guesses) =
-  length [x |  x <- guesses, not $ x `elem` correctGuesses]
+  length [x |  x <- guesses, x `notElem` correctGuesses]
   where correctGuesses = foldr go [] filledIn 
         go c ls =
           case c of
@@ -118,18 +113,16 @@ wrongGuesses (Puzzle _ filledIn guesses) =
 
 gameWin :: Puzzle -> IO ()
 gameWin (Puzzle _ filledInSoFar _) =
-  if all isJust filledInSoFar 
-  then do 
-    putStrLn "You win!"
-    playAgain
-  else return ()
+    when (all isJust filledInSoFar)
+        (do putStrLn "You win!"
+            playAgain)
 
 playAgain :: IO ()
 playAgain = do 
   putStrLn "Play again?"
   response <- getLine
   case response of
-    "yes"   -> main
+    "yes" -> main
     _     -> exitSuccess
 
 runGame :: Puzzle -> IO ()
